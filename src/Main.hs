@@ -38,6 +38,66 @@ getReversedList' = foldl (flip (:)) []
 getReversedList'' :: [a] -> [a]
 getReversedList'' = foldl (\acc x -> x : acc) []
 
+-- (6) Find out whether a list is a palindrome.
+isPalindrome :: (Eq a) => [a] -> Bool
+isPalindrome [] = True
+isPalindrome [x] = True
+isPalindrome (x:xs) = (x == last xs) && isPalindrome (init xs)
+-- am alternative using reverse
+isPalindrome' :: (Eq a) => [a] -> Bool
+isPalindrome' xs = xs == (reverse xs)
+
+-- (7) Flatten a nested list structure.
+data NestedList a = Elem a | List [NestedList a]
+    deriving Show
+-- some nested lists for debugging
+nestedList1 = Elem 5
+nestedList2 = (List [Elem 1, List [Elem 2, List [Elem 3, Elem 4], Elem 5]])
+
+flatten :: NestedList a -> [a]
+flatten (Elem x) = [x]
+flatten (List (x:xs)) = flatten x ++ flatten (List xs)
+flatten (List []) = []
+-- an alternative using foldr
+flatten' :: NestedList a -> [a]
+flatten' (Elem x) = [x]
+flatten' (List xs) = foldr (++) [] $ map flatten' xs
+
+-- (8) Eliminate consecutive duplicates of list elements.
+compress :: (Eq a) => [a] -> [a]
+compress [] = []
+compress [x] = [x]
+compress (x:xs)
+    | x == head xs = compress xs
+    | otherwise = x : compress xs
+-- other more compact solution
+compress' :: (Eq a) => [a] -> [a]
+compress' (x:xs@(y:_))
+    | x == y = compress' xs
+    | otherwise = x : compress' xs
+compress' xs = xs
+
+-- (9) Pack consecutive duplicates of list elements into sublists.
+pack :: (Eq a) => [a] -> [[a]]
+pack = foldr func []
+    where func x [] = [[x]]
+          func x (y:xs) =
+              if x == head y
+                  then ((x:y):xs)
+                  else ([x]:y:xs)
+-- or using span
+pack' :: (Eq a) => [a] -> [[a]]
+pack' (x:xs) = let (first, rest) = span (== x) xs
+                in (x:first) : pack' rest
+pack' [] = []
+
+-- (10) Run-length encoding of a list.
+encode :: (Eq a) => [a] -> [(Int, a)]
+encode list = map (\x -> (length x, head x)) (pack list)
+-- without using a lambda
+encode' :: (Eq a) => [a] -> [(Int, a)]
+encode' list = [(length x, head x) | x <- pack list]
+
 main :: IO ()
 main = do
     print $ getLastElement [1,2,3,4]
@@ -54,3 +114,17 @@ main = do
     print $ getReversedList "A man, a plan, a canal, panama!"
     print $ getReversedList' "A man, a plan, a canal, panama!"
 
+    print $ isPalindrome [1,2,4,8,16,8,4,2,1]
+    print $ isPalindrome "madamimadam"
+
+    print $ flatten nestedList1
+    print $ flatten' nestedList2
+
+    print $ compress "aaaabccaadeeee"
+    print $ compress' "aaaabccaadeeee"
+
+    print $ pack ['a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e']
+    print $ pack' ['a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e']
+
+    print $ encode "aaaabccaadeeee"
+    print $ encode' "aaaabccaadeeee"
