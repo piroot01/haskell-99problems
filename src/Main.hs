@@ -23,9 +23,20 @@ getNthElement' (_:xs) index
 -- (4) Find the number of elements in a list.
 getListLength :: [a] -> Int
 getListLength = length
--- alternatice using foldr
+-- alternaticve using foldr
 getListLength' :: [a] -> Int
 getListLength' = foldr (\_ n -> n + 1) 0
+
+-- (5) Reverse a list.
+getReversedList :: [a] -> [a]
+getReversedList [] = []
+getReversedList (x:xs) = getReversedList xs ++ [x]
+-- alternative using foldr
+getReversedList' :: [a] -> [a]
+getReversedList' = foldl (flip (:)) []
+-- which is essentially the same as
+getReversedList'' :: [a] -> [a]
+getReversedList'' = foldl (\acc x -> x : acc) []
 
 main :: IO ()
 main = do
@@ -39,4 +50,7 @@ main = do
 
     print $ getListLength [1..1000]
     print $ getListLength' [1..1000]
+
+    print $ getReversedList "A man, a plan, a canal, panama!"
+    print $ getReversedList' "A man, a plan, a canal, panama!"
 
